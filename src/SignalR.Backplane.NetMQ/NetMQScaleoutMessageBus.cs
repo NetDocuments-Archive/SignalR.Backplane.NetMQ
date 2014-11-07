@@ -90,12 +90,19 @@
         {
             while(_running)
             {
-                byte[] bytes = subscriberSocket.Receive();
+                try
+                {
+                    byte[] bytes = subscriberSocket.Receive();
 
-                NetMQMessage message = NetMQMessage.FromBytes(bytes);
+                    NetMQMessage message = NetMQMessage.FromBytes(bytes);
 
-                TraceMessages(message.ScaleoutMessage.Messages, "Receiving at " + _configuration.PublisherAddress);
-                OnReceived(0, (ulong) message.MessageId, message.ScaleoutMessage);
+                    TraceMessages(message.ScaleoutMessage.Messages, "Receiving at " + _configuration.PublisherAddress);
+                    OnReceived(0, (ulong) message.MessageId, message.ScaleoutMessage);
+                }
+                catch(TerminatingException)
+                {
+                    //Noop
+                }
             }
         }
 

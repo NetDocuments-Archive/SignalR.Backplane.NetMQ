@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Backplane.NetMQ", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Backplane.NetMQ.Tests", "SignalR.Backplane.NetMQ.Tests\SignalR.Backplane.NetMQ.Tests.csproj", "{A95F52BC-F27A-436A-B60E-71E63631C70E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleServer", "SampleServer\SampleServer.csproj", "{9C499B0A-92B9-4B2F-B1C1-CEC8E7B2ADAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A95F52BC-F27A-436A-B60E-71E63631C70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A95F52BC-F27A-436A-B60E-71E63631C70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A95F52BC-F27A-436A-B60E-71E63631C70E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C499B0A-92B9-4B2F-B1C1-CEC8E7B2ADAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C499B0A-92B9-4B2F-B1C1-CEC8E7B2ADAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C499B0A-92B9-4B2F-B1C1-CEC8E7B2ADAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C499B0A-92B9-4B2F-B1C1-CEC8E7B2ADAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

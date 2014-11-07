@@ -1,12 +1,10 @@
 ﻿namespace Signalr.Backplane.NetMQ
 {
     using System;
+    using System.Diagnostics;
+    using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.AspNet.SignalR;
-    using Microsoft.AspNet.SignalR.Client;
-    using Microsoft.Owin.Hosting;
-    using Owin;
-    using SignalR.Backplane.NetMQ.Annotations;
+    using SampleServer;
     using Xunit;
 
     public class NetMQMessageBusTests
@@ -14,58 +12,50 @@
         [Fact]
         public async Task Can_scale_out()
         {
-            const string serverUrl1 = "http://localhost:8180";
-            const string serverUrl2 = "http://localhost:8181";
-            var config1 = new NetMQScaleoutConfiguration("tcp://127.0.0.1:18180", new[] { "tcp://127.0.0.1:18181" });
-            var config2 = new NetMQScaleoutConfiguration("tcp://127.0.0.1:18181", new[] { "tcp://127.0.0.1:18180" });
+            const int serverCount = 4;
 
-            Action<IAppBuilder, NetMQScaleoutConfiguration> appBuilder = (app, config) =>
-            {
-                var resolver = new DefaultDependencyResolver();
-                resolver.UseNetMQServiceBus(config);
-                var hubConfiguration = new HubConfiguration
+            var allSubscriberPorts = Enumerable
+                .Range(0, serverCount)
+                .Select(i => 18100 + i)
+                .ToArray();
+
+            var testServers = Enumerable
+                .Range(0, serverCount)
+                .Select(i =>
                 {
-                    Resolver = resolver
-                };
-                app.MapSignalR(hubConfiguration);
-            };
+                    var httpPort = 8100 + i;
+                    var netMQPort = 18100 + i;
+                    var subscriberPorts = allSubscriberPorts.Except(new[] {netMQPort});
+                    return new SignalRSampleServer(httpPort, netMQPort, subscriberPorts);
+                })
+                .ToArray();
 
-            using (WebApp.Start(serverUrl1, app => appBuilder(app, config1)))
-            {
-                using (WebApp.Start(serverUrl2, app => appBuilder(app, config2)))
+            const string sentMessage = "Hello";
+
+            var messagesReceived = Task.WhenAll(testServers
+                .Skip(1)
+                .Select(s =>
                 {
                     var tcs = new TaskCompletionSource<string>();
-                    const string hubName = "ChatHub";
-                    var hubConnection1 = new HubConnection(serverUrl1);
-                    IHubProxy chatHubProxy1 = hubConnection1.CreateHubProxy(hubName);
-                    await hubConnection1.Start();
+                    s.Messages.Subscribe(tcs.SetResult);
+                    return tcs.Task;
+                })
+                .ToArray());
 
-                    var hubConnection2 = new HubConnection(serverUrl2);
-                    IHubProxy chatHubProxy2 = hubConnection2.CreateHubProxy(hubName);
-                    chatHubProxy2.On<string>("broadcastMessage", tcs.SetResult);
-                    await hubConnection2.Start();
+            var stopwatch = Stopwatch.StartNew();
+            await testServers[0].HubProxy.Invoke<string>("Send", sentMessage);
 
-                    const string expectedMessage = "Hello";
-                    await chatHubProxy1.Invoke<string>("Send", expectedMessage);
+            var timeoutTask = Task.Delay(3000);
 
-                    if (await Task.WhenAny(tcs.Task, Task.Delay(5000)) != tcs.Task)
-                    {
-                        throw new TimeoutException("Timed out waiting for message");
-                    }
-
-                    Assert.Equal(expectedMessage, (await tcs.Task));
-                }
+            if(await Task.WhenAny(messagesReceived, timeoutTask) == timeoutTask)
+            {
+                throw new TimeoutException("Timed out waiting for message");
             }
-        }
-    }
-
-    [UsedImplicitly]
-    public class ChatHub : Hub
-    {
-        public void Send(string message)
-        {
-            // Call the broadcastMessage method to update clients.
-            Clients.All.broadcastMessage(message);
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            foreach(var testServer in testServers)
+            {
+                testServer.Dispose();
+            }
         }
     }
 }
