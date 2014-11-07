@@ -1,1 +1,1 @@
-.\SampleServer\bin\debug\SampleClient.exe -HttpPort 8102
+.\SampleClient\bin\debug\SampleClient.exe -HttpPort 8102

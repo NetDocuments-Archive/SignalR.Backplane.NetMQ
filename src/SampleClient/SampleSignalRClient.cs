@@ -30,7 +30,7 @@
 
         public Task<string> Send(string message)
         {
-            return _chatHubProxy.Invoke<string>("Send", "Via {0}: {1}", _httpPort, message);
+            return _chatHubProxy.Invoke<string>("Send", string.Format("Via {0}: {1}", _httpPort, message));
         }
 
         public void Dispose()

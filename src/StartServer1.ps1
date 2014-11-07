@@ -1,1 +1,1 @@
-.\SampleServer\bin\debug\SampleServer.exe -HttpPort 8100 -NetMQPort 18100 -SubscriberPorts 18101,18102
+.\SampleServer\bin\debug\SampleServer.exe -HttpPort 8100 -NetMQPort 18100 -SubscriberPorts "18101,18102"

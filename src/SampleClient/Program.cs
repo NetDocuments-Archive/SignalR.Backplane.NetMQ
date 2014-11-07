@@ -10,17 +10,20 @@
             var settings = Args.Parse<Settings>(args);
             using(var client = new SampleSignalRClient(settings.HttpPort))
             {
-                Console.WriteLine("Client connected to HTTP {0}.", settings.HttpPort);
-
-                while(true)
+                using(client.Messages.Subscribe(Console.WriteLine))
                 {
-                    Console.Write("> ");
-                    var message = Console.ReadLine();
-                    if(message == "exit")
+                    Console.WriteLine("Client connected to HTTP {0}.", settings.HttpPort);
+
+                    while(true)
                     {
-                        break;
+                        Console.Write("> ");
+                        var message = Console.ReadLine();
+                        if(message == "exit")
+                        {
+                            break;
+                        }
+                        client.Send(message).Wait();
                     }
-                    client.Send(message);
                 }
             }
         }
