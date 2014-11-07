@@ -1,0 +1,1 @@
+.\SampleServer\bin\debug\SampleServer.exe -HttpPort 8102 -NetMQPort 18102 -SubscriberPorts 18100,18101

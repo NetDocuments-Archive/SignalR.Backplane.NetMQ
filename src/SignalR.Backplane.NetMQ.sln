@@ -11,6 +11,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleServer", "SampleServe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleClient", "SampleClient\SampleClient.csproj", "{705B729B-213B-45F6-B5A5-91D7C188BF98}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{23DD4884-A377-4DCA-A87F-50A3971814D6}"
+	ProjectSection(SolutionItems) = preProject
+		StartClient1.ps1 = StartClient1.ps1
+		StartClient2.ps1 = StartClient2.ps1
+		StartClient3.ps1 = StartClient3.ps1
+		StartServer1.ps1 = StartServer1.ps1
+		StartServer2.ps1 = StartServer2.ps1
+		StartServer3.ps1 = StartServer3.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
