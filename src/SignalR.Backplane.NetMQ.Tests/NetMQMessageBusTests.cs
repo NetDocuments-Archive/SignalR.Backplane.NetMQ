@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using SampleClient;
     using SampleServer;
     using Xunit;
 
@@ -12,27 +13,23 @@
         [Fact]
         public async Task Can_scale_out()
         {
-            const int serverCount = 4;
+            var servers = new[]
+            {
+                new SampleSignalRServer(8100, 18100, new[] {18101, 18102}),
+                new SampleSignalRServer(8101, 18101, new[] {18100, 18102}),
+                new SampleSignalRServer(8102, 18102, new[] {18100, 18101})
+            };
 
-            var allSubscriberPorts = Enumerable
-                .Range(0, serverCount)
-                .Select(i => 18100 + i)
-                .ToArray();
+            var cients = new[]
+            {
+                new SampleSignalRClient(8100),
+                new SampleSignalRClient(8101),
+                new SampleSignalRClient(8102)
+            };
 
-            var testServers = Enumerable
-                .Range(0, serverCount)
-                .Select(i =>
-                {
-                    var httpPort = 8100 + i;
-                    var netMQPort = 18100 + i;
-                    var subscriberPorts = allSubscriberPorts.Except(new[] {netMQPort});
-                    return new SignalRSampleServer(httpPort, netMQPort, subscriberPorts);
-                })
-                .ToArray();
+            const string message = "Hello";
 
-            const string sentMessage = "Hello";
-
-            var messagesReceived = Task.WhenAll(testServers
+            var messagesReceived = Task.WhenAll(cients
                 .Skip(1)
                 .Select(s =>
                 {
@@ -43,7 +40,7 @@
                 .ToArray());
 
             var stopwatch = Stopwatch.StartNew();
-            await testServers[0].HubProxy.Invoke<string>("Send", sentMessage);
+            await cients[0].Send(message);
 
             var timeoutTask = Task.Delay(3000);
 
@@ -52,9 +49,10 @@
                 throw new TimeoutException("Timed out waiting for message");
             }
             Console.WriteLine(stopwatch.ElapsedMilliseconds);
-            foreach(var testServer in testServers)
+
+            foreach (var server in servers)
             {
-                testServer.Dispose();
+                server.Dispose();
             }
         }
     }
